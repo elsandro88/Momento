@@ -1,0 +1,1066 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>momento. — regala un momento, anche da lontano</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,650&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F5E8DC;
+    --cream-deep:#ECD6C2;
+    --white:#FFFAF3;
+    --ink:#3B2A28;
+    --ink-soft:#8C7468;
+    --ink-faint:#C7AFA0;
+    --accent:#BD5A32;
+    --accent-deep:#8F3F20;
+    --accent-soft:#F1DCC9;
+    --sage:#6E7F5C;
+    --sage-soft:#DFE4D1;
+    --gold:#D89A4E;
+    --line:#E2CDB6;
+    --shadow: 0 18px 40px -20px rgba(59,42,40,0.30);
+    --shadow-soft: 0 8px 22px -14px rgba(59,42,40,0.24);
+    --radius-l: 26px;
+    --radius-m: 18px;
+    --radius-s: 12px;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--cream-deep);
+    color:var(--ink);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    min-height:100vh;
+    padding: 28px 16px;
+  }
+  h1,h2,h3{ font-family:'Fraunces', serif; margin:0; font-weight:600; letter-spacing:-0.01em; }
+  p{ margin:0; }
+  button{ font-family:inherit; border:none; background:none; cursor:pointer; -webkit-appearance:none; appearance:none; }
+  input,textarea{ font-family:inherit; }
+  ::selection{ background: var(--accent-soft); }
+
+  /* ---------- device shell ---------- */
+  #shell{
+    width: 100%;
+    max-width: 420px;
+    background: var(--cream);
+    border-radius: 40px;
+    box-shadow: var(--shadow), 0 0 0 10px #1c1712, 0 0 0 11px #34291d;
+    overflow:hidden;
+    position:relative;
+    height: min(880px, 92vh);
+    display:flex;
+    flex-direction:column;
+  }
+  @media (min-width: 700px){
+    body{ padding: 46px 16px; }
+  }
+  @media (max-width: 460px){
+    #shell{
+      border-radius: 0;
+      box-shadow:none;
+      max-width:100%;
+      height: 100vh;
+      height:100dvh;
+    }
+    body{ padding:0; }
+  }
+
+  #notch{
+    height: 30px;
+    flex-shrink:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background: transparent;
+    position:relative;
+    z-index:5;
+  }
+  #notch::before{
+    content:'';
+    width: 90px; height:20px;
+    background:#1c1712;
+    border-radius: 0 0 16px 16px;
+  }
+
+  #viewport{
+    flex:1;
+    position:relative;
+    overflow:hidden;
+  }
+
+  .screen{
+    position:absolute; inset:0;
+    display:flex; flex-direction:column;
+    background: var(--cream);
+    transform: translateX(100%);
+    transition: transform .38s cubic-bezier(.32,.72,0,1);
+    overflow-y:auto;
+    -ms-overflow-style:none; scrollbar-width:none;
+  }
+  .screen::-webkit-scrollbar{ display:none; }
+  .screen.active{ transform: translateX(0); z-index:2; }
+  .screen.behind{ transform: translateX(-24%); z-index:1; }
+  .screen[data-root="true"]{ transition: none; }
+
+  .screen-pad{ padding: 22px 22px 110px; flex:1; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex; align-items:center; gap:12px;
+    padding: 14px 18px 6px;
+    flex-shrink:0;
+  }
+  .backbtn{
+    width:38px; height:38px; border-radius:50%;
+    background: var(--white);
+    display:flex; align-items:center; justify-content:center;
+    font-size:17px;
+    box-shadow: var(--shadow-soft);
+    color: var(--ink);
+    flex-shrink:0;
+  }
+  .topbar-title{ font-size:15px; font-weight:600; color:var(--ink-soft); font-family:'Inter'; }
+
+  /* ---------- logo ---------- */
+  .brand{
+    display:flex; align-items:center; gap:8px;
+    font-family:'Fraunces'; font-weight:600; font-size:20px; color:var(--ink);
+  }
+  .brand .dot{
+    width:9px; height:9px; border-radius:50%;
+    background: var(--accent);
+    display:inline-block;
+    transform: translateY(1px);
+  }
+
+  /* ---------- home ---------- */
+  .home-top{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 18px 22px 4px;
+  }
+  .demo-link{
+    font-size:12.5px; color: var(--ink-soft); font-weight:500;
+    padding: 6px 12px; border-radius:999px; background: var(--white);
+  }
+
+  .hero{ padding: 22px 4px 8px; }
+  .hero h1{
+    font-size: 32px; line-height:1.16; color:var(--ink);
+    max-width: 300px;
+  }
+  .hero p{
+    margin-top:14px; font-family:'Fraunces'; font-style:italic; font-weight:400; font-size:16px; line-height:1.5; color:var(--ink-soft);
+    max-width: 300px;
+  }
+  .hero-cta-row{ display:flex; gap:10px; margin-top:22px; flex-wrap:wrap; }
+  .btn-primary{
+    background: var(--accent); color:#fff; font-weight:600; font-size:14.5px;
+    padding: 14px 22px; border-radius:999px;
+    box-shadow: 0 14px 26px -12px rgba(168,70,46,0.55);
+    transition: transform .15s ease;
+  }
+  .btn-primary:active{ transform: scale(.97); }
+  .btn-ghost{
+    color: var(--ink); font-weight:600; font-size:14.5px;
+    padding: 14px 18px; border-radius:999px; background: var(--white);
+    box-shadow: var(--shadow-soft);
+  }
+  .btn-ghost:active{ transform: scale(.97); }
+
+  .section-label{
+    font-family:'Fraunces'; font-size:19px; font-weight:600;
+    margin: 30px 4px 14px; color:var(--ink);
+  }
+
+  .moment-grid{
+    display:grid; grid-template-columns: 1fr 1fr; gap: 12px;
+    padding: 0 4px 6px;
+  }
+  .moment-card{
+    background: var(--white); border-radius: var(--radius-m);
+    padding: 22px 14px 15px; text-align:left;
+    box-shadow: var(--shadow-soft);
+    display:flex; flex-direction:column; gap:10px;
+    transition: transform .18s ease, box-shadow .18s ease;
+    position: relative;
+    transform: rotate(-1.4deg);
+  }
+  .moment-card:nth-child(even){ transform: rotate(1.2deg); }
+  .moment-card:nth-child(3n){ transform: rotate(-0.6deg); }
+  .moment-card::before{
+    content:'';
+    position:absolute; top:-9px; left:18px;
+    width:38px; height:15px;
+    background: var(--sage);
+    opacity:.75;
+    transform: rotate(-5deg);
+    border-radius: 2px;
+  }
+  .moment-card:nth-child(3n)::before{ background: var(--accent); left:auto; right:16px; transform: rotate(6deg); }
+  .moment-card:active{ transform: rotate(0deg) scale(.96); }
+  .moment-card .emoji{ font-size:26px; }
+  .moment-card .name{ font-size:14.5px; font-weight:600; color:var(--ink); }
+  .moment-card .price{ font-family:'Fraunces'; font-size:14px; color:var(--accent-deep); font-weight:500; }
+
+  .home-footer-space{ height: 8px; }
+
+  /* ---------- bottom nav ---------- */
+  #bottomnav{
+    display:flex; justify-content:space-around; align-items:center;
+    padding: 10px 8px calc(12px + env(safe-area-inset-bottom, 0px));
+    background: rgba(247,241,231,0.92);
+    backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line);
+    position:absolute; left:0; right:0; bottom:0; z-index:20;
+  }
+  .navitem{
+    display:flex; flex-direction:column; align-items:center; gap:3px;
+    color: var(--ink-faint); font-size:10.5px; font-weight:600;
+    padding:4px 12px; border-radius:14px;
+  }
+  .navitem .navicon{ font-size:19px; }
+  .navitem.active{ color: var(--accent); }
+
+  /* ---------- moment detail overlay ---------- */
+  .detail-hero{
+    display:flex; flex-direction:column; align-items:center; text-align:center;
+    padding: 26px 20px 10px;
+  }
+  .detail-emoji-wrap{
+    width:110px; height:110px; border-radius:50%;
+    background: var(--accent-soft);
+    display:flex; align-items:center; justify-content:center;
+    font-size:52px;
+    margin-bottom: 22px;
+    box-shadow: inset 0 0 0 1px rgba(168,70,46,0.08);
+  }
+  .detail-hero h2{ font-size:24px; max-width:260px; }
+  .detail-hero .sub{ margin-top:10px; color:var(--ink-soft); font-size:14.5px; max-width:260px; line-height:1.5; }
+  .detail-price{
+    margin-top:20px; font-family:'Fraunces'; font-size:26px; color:var(--ink); font-weight:500;
+  }
+  .detail-actions{ margin-top:28px; display:flex; flex-direction:column; gap:10px; align-items:center; width:100%; padding: 0 20px; }
+  .detail-actions .btn-primary{ width:100%; text-align:center; }
+  .link-quiet{ font-size:13.5px; color: var(--ink-soft); font-weight:600; text-decoration: underline; text-decoration-color: var(--ink-faint); text-underline-offset:3px; }
+
+  /* ---------- lists (recipient) ---------- */
+  .page-title{ font-family:'Fraunces'; font-size:23px; padding: 6px 22px 4px; max-width:280px; }
+  .page-sub{ padding: 8px 22px 0; color:var(--ink-soft); font-size:14px; }
+
+  .contact-grid{
+    display:grid; grid-template-columns: 1fr 1fr; gap:12px;
+    padding: 20px 22px 10px;
+  }
+  .contact-card{
+    background: var(--white); border-radius: var(--radius-m);
+    padding: 18px 12px; display:flex; flex-direction:column; align-items:center; gap:10px;
+    box-shadow: var(--shadow-soft);
+    border: 2px solid transparent;
+  }
+  .contact-card .avatar{
+    width:52px; height:52px; border-radius:50%;
+    background: var(--cream-deep); display:flex; align-items:center; justify-content:center;
+    font-size:24px;
+  }
+  .contact-card .cname{ font-weight:600; font-size:14px; }
+  .contact-card.selected{ border-color: var(--accent); }
+  .contact-card.selected .avatar{ background: var(--accent-soft); }
+
+  .invite-card{
+    grid-column: span 2;
+    background: transparent; border: 1.5px dashed var(--ink-faint);
+    border-radius: var(--radius-m); padding: 16px;
+    display:flex; align-items:center; justify-content:center;
+    color: var(--ink-soft); font-weight:600; font-size:14px;
+  }
+
+  .flow-footer{
+    position:absolute; left:0; right:0; bottom:0; padding: 14px 22px calc(18px + env(safe-area-inset-bottom,0px));
+    background: linear-gradient(to top, var(--cream) 60%, transparent);
+  }
+  .flow-footer .btn-primary{ width:100%; text-align:center; opacity:1; transition: opacity .2s ease; }
+  .flow-footer .btn-primary.disabled{ opacity:.4; pointer-events:none; }
+
+  /* ---------- personalize ---------- */
+  .gift-chip{
+    margin: 16px 22px 0; padding: 14px 16px; background: var(--white);
+    border-radius: var(--radius-m); display:flex; align-items:center; gap:12px;
+    box-shadow: var(--shadow-soft);
+  }
+  .gift-chip .emoji{ font-size:26px; }
+  .gift-chip .txt strong{ display:block; font-size:14.5px; font-weight:600; }
+  .gift-chip .txt span{ font-size:12.5px; color:var(--ink-soft); }
+
+  .msg-box{
+    margin: 20px 22px 0; background: var(--white); border-radius: var(--radius-m);
+    box-shadow: var(--shadow-soft); padding: 4px;
+  }
+  textarea{
+    width:100%; border:none; background:transparent; resize:none;
+    padding: 16px 14px; font-size:15px; color:var(--ink); line-height:1.5;
+    min-height: 90px; outline:none;
+  }
+  .suggested-wrap{ display:flex; flex-wrap:wrap; gap:8px; padding: 18px 22px 0; }
+  .chip{
+    padding: 10px 14px; background: var(--white); border-radius: 999px;
+    font-size:13px; color: var(--ink); font-weight:500;
+    box-shadow: var(--shadow-soft);
+  }
+  .chip:active{ transform: scale(.96); }
+
+  /* ---------- venue search ---------- */
+  .venue-search-input{
+    margin: 16px 22px 0; display:flex; align-items:center; gap:10px;
+    background: var(--white); border-radius: 999px; padding: 13px 18px;
+    box-shadow: var(--shadow-soft);
+  }
+  .venue-search-input input{
+    border:none; outline:none; background:transparent; font-size:14.5px; color:var(--ink); flex:1;
+  }
+  .venue-search-input .searchicon{ font-size:15px; color:var(--ink-faint); }
+
+  .venue-list{ padding: 18px 22px 6px; display:flex; flex-direction:column; gap:12px; }
+  .venue-card{
+    background: var(--white); border-radius: var(--radius-m);
+    padding: 15px 16px; display:flex; align-items:center; gap:14px;
+    box-shadow: var(--shadow-soft); text-align:left; border: 2px solid transparent;
+  }
+  .venue-card.selected{ border-color: var(--accent); }
+  .venue-card .vinfo{ flex:1; min-width:0; }
+  .venue-card .vname{ font-size:14.5px; font-weight:600; }
+  .venue-card .vaddr{ font-size:12px; color:var(--ink-soft); margin-top:3px; }
+  .venue-card .vhours{ font-size:11.5px; color:var(--ink-faint); margin-top:2px; }
+  .venue-card .vprice{
+    font-family:'Fraunces'; font-size:17px; color:var(--accent-deep); font-weight:500;
+    flex-shrink:0; text-align:right;
+  }
+  .venue-empty{ padding: 30px 20px; text-align:center; color:var(--ink-faint); font-size:13.5px; line-height:1.6; }
+
+  /* ---------- checkout ---------- */
+  .checkout-card{
+    margin: 16px 22px 0; background: var(--white); border-radius: var(--radius-m);
+    box-shadow: var(--shadow-soft); overflow:hidden;
+  }
+  .checkout-row{
+    display:flex; align-items:center; justify-content:space-between;
+    padding: 16px 18px; border-bottom: 1px solid var(--line);
+    gap: 12px;
+  }
+  .checkout-row:last-child{ border-bottom:none; }
+  .checkout-row .left{ display:flex; align-items:center; gap:12px; }
+  .checkout-row .left .emoji{ font-size:22px; }
+  .checkout-row .left .l1{ font-size:14.5px; font-weight:600; }
+  .checkout-row .left .l2{ font-size:12.5px; color:var(--ink-soft); }
+  .checkout-row .right{ font-family:'Fraunces'; font-size:15px; color:var(--ink); text-align:right; max-width:150px; }
+  .checkout-row .msgtext{ font-size:13px; color:var(--ink-soft); font-style:italic; text-align:right; }
+
+  .paycard{
+    margin: 16px 22px 0; background: var(--ink); color:#fff; border-radius: var(--radius-m);
+    padding: 18px 20px; display:flex; align-items:center; justify-content:space-between;
+    box-shadow: var(--shadow-soft);
+  }
+  .paycard .l1{ font-size:13px; opacity:.7; }
+  .paycard .l2{ font-size:15px; font-weight:600; margin-top:4px; letter-spacing:0.02em; }
+  .paycard .cardicon{ font-size:22px; }
+
+  /* ---------- sending overlay ---------- */
+  #sendingOverlay{
+    position:absolute; inset:0; z-index:50;
+    background: var(--cream);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition: opacity .35s ease;
+  }
+  #sendingOverlay.active{ opacity:1; pointer-events:all; }
+  .send-emojis{ font-size:44px; display:flex; gap:18px; align-items:center; }
+  .send-emojis span{ opacity:0; transform: translateY(10px) scale(.8); transition: opacity .4s ease, transform .4s ease; }
+  .send-emojis span.show{ opacity:1; transform: translateY(0) scale(1); }
+  #sendingOverlay .sendlabel{
+    margin-top: 26px; font-family:'Fraunces'; font-size:19px; opacity:0; transition: opacity .4s ease .2s;
+  }
+  #sendingOverlay .sendlabel.show{ opacity:1; }
+
+  /* ---------- receiver screen ---------- */
+  .receiver-wrap{ padding: 40px 26px 30px; text-align:center; }
+  .receiver-wrap .lead{ font-size:14.5px; color:var(--ink-soft); font-weight:600; }
+  .receiver-wrap h2{ font-size:24px; margin-top:8px; line-height:1.3; }
+  .receiver-gift{
+    margin: 30px auto 0; width: 150px; height:150px; border-radius:50%;
+    background: radial-gradient(circle at 35% 30%, var(--accent-soft), var(--white));
+    display:flex; align-items:center; justify-content:center; font-size:60px;
+    box-shadow: var(--shadow);
+  }
+  .receiver-wrap .giftname{ margin-top:20px; font-family:'Fraunces'; font-size:21px; }
+  .receiver-quote{
+    margin: 18px auto 0; max-width: 260px; font-size:14.5px; color:var(--ink-soft);
+    font-style:italic; line-height:1.5;
+  }
+  .receiver-wrap .btn-primary{ margin-top:30px; width:100%; }
+  .receiver-note{ margin-top:14px; font-size:12px; color:var(--ink-faint); }
+
+  /* ---------- wallet ---------- */
+  .wallet-item{
+    margin: 0 22px 12px; background: var(--white); border-radius: var(--radius-m);
+    padding: 16px 16px; display:flex; align-items:center; gap:14px;
+    box-shadow: var(--shadow-soft);
+  }
+  .wallet-item .emoji-wrap{
+    width:48px; height:48px; border-radius:14px; background: var(--cream-deep);
+    display:flex; align-items:center; justify-content:center; font-size:22px; flex-shrink:0;
+  }
+  .wallet-item .info strong{ font-size:14.5px; display:block; }
+  .wallet-item .info span{ font-size:12.5px; color:var(--ink-soft); }
+  .status-pill{ margin-left:auto; font-size:11.5px; font-weight:600; padding:6px 10px; border-radius:999px; white-space:nowrap; }
+  .status-pill.pending{ background: var(--accent-soft); color: var(--accent-deep); }
+  .status-pill.used{ background: var(--cream-deep); color: var(--ink-faint); }
+
+  .empty-hint{ text-align:center; color:var(--ink-faint); font-size:13.5px; padding: 40px 30px; line-height:1.6; }
+
+  /* ---------- activity ---------- */
+  .timeline-item{
+    display:flex; gap:14px; padding: 14px 22px;
+  }
+  .timeline-item .dot-emoji{
+    width:38px; height:38px; border-radius:50%; background:var(--white); box-shadow: var(--shadow-soft);
+    display:flex; align-items:center; justify-content:center; font-size:17px; flex-shrink:0;
+  }
+  .timeline-item .txt p{ font-size:14px; line-height:1.4; }
+  .timeline-item .txt span{ font-size:12px; color:var(--ink-faint); }
+
+  .stats-row{ display:flex; gap:12px; padding: 4px 22px 0; }
+  .stat-card{
+    flex:1; background: var(--white); border-radius: var(--radius-m); padding: 18px 14px;
+    box-shadow: var(--shadow-soft); text-align:center;
+  }
+  .stat-card .num{ font-family:'Fraunces'; font-size:26px; color:var(--accent-deep); }
+  .stat-card .lbl{ font-size:12px; color:var(--ink-soft); margin-top:4px; }
+
+  .profile-head{ display:flex; flex-direction:column; align-items:center; padding: 34px 20px 10px; text-align:center; }
+  .profile-avatar{
+    width:76px; height:76px; border-radius:50%; background: var(--accent-soft);
+    display:flex; align-items:center; justify-content:center; font-size:32px; margin-bottom:14px;
+  }
+  .profile-head h2{ font-size:21px; }
+
+  /* ---------- how it works modal ---------- */
+  .howitworks-step{ display:flex; gap:14px; padding: 14px 22px; align-items:flex-start; }
+  .howitworks-step .n{
+    width:34px; height:34px; border-radius:50%; background: var(--accent); color:#fff;
+    display:flex; align-items:center; justify-content:center; font-family:'Fraunces'; font-size:15px; flex-shrink:0;
+  }
+  .howitworks-step p{ font-size:14.5px; line-height:1.5; padding-top:6px; }
+  .howitworks-step strong{ display:block; font-size:15px; margin-bottom:2px; font-family:'Inter'; }
+
+  .restart-row{ text-align:center; padding: 26px 22px 6px; }
+  .restart-row button{ font-size:12.5px; color: var(--ink-faint); font-weight:600; }
+
+  @media (min-width:700px){
+    .moment-card:hover{ transform: translateY(-2px); box-shadow: var(--shadow); }
+  }
+</style>
+</head>
+<body>
+
+<div id="shell">
+  <div id="notch"></div>
+  <div id="viewport">
+
+    <!-- HOME -->
+    <section class="screen active" data-view="home" data-root="true">
+      <div class="home-top">
+        <div class="brand"><span class="dot"></span>momento.</div>
+        <button class="demo-link" onclick="startDemo()">Prova la demo →</button>
+      </div>
+      <div class="screen-pad" style="padding-top:0;">
+        <div class="hero">
+          <h1>Regala un momento,<br>anche da lontano.</h1>
+          <svg width="118" height="10" viewBox="0 0 118 10" style="margin-top:2px; display:block;" aria-hidden="true">
+            <path d="M2 6 Q 16 1, 30 6 T 58 6 T 86 6 T 116 5" stroke="var(--accent)" stroke-width="2.5" fill="none" stroke-linecap="round"/>
+          </svg>
+          <p>Un caffè, una colazione, un aperitivo. Piccoli gesti che fanno sentire qualcuno vicino.</p>
+          <div class="hero-cta-row">
+            <button class="btn-primary" onclick="scrollToGrid()">Regala un momento</button>
+            <button class="btn-ghost" onclick="openHowItWorks()">Come funziona?</button>
+          </div>
+        </div>
+
+        <div class="section-label" id="grid-anchor">Cosa vuoi regalare?</div>
+        <div class="moment-grid" id="momentGrid"></div>
+        <div class="home-footer-space"></div>
+      </div>
+    </section>
+
+    <!-- MOMENT DETAIL -->
+    <section class="screen" data-view="detail">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <div class="brand" style="font-size:16px;"><span class="dot"></span>momento.</div>
+      </div>
+      <div class="screen-pad" id="detailContent"></div>
+    </section>
+
+    <!-- VENUE SEARCH -->
+    <section class="screen" data-view="venuesearch">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <span class="topbar-title">Scegli il locale</span>
+      </div>
+      <div class="screen-pad" style="padding-bottom:120px;">
+        <h2 class="page-title">Dove vuoi che lo ritiri?</h2>
+        <p class="page-sub">Il prezzo cambia in base al locale che scegli.</p>
+        <div class="venue-search-input">
+          <span class="searchicon">🔍</span>
+          <input type="text" id="venueSearchInput" placeholder="Cerca per nome o zona" oninput="filterVenues()">
+        </div>
+        <div class="venue-list" id="venueList"></div>
+      </div>
+      <div class="flow-footer">
+        <button class="btn-primary disabled" id="venueContinueBtn" onclick="confirmVenueAndContinue()">Continua</button>
+      </div>
+    </section>
+
+    <!-- RECIPIENT -->
+    <section class="screen" data-view="recipient">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <span class="topbar-title">Scegli il destinatario</span>
+      </div>
+      <div class="screen-pad" style="padding-bottom:120px;">
+        <h2 class="page-title">A chi vuoi regalare questo momento?</h2>
+        <div class="contact-grid" id="contactGrid"></div>
+      </div>
+      <div class="flow-footer">
+        <button class="btn-primary disabled" id="recipientContinueBtn" onclick="goToPersonalize()">Continua</button>
+      </div>
+    </section>
+
+    <!-- PERSONALIZE -->
+    <section class="screen" data-view="personalize">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <span class="topbar-title">Personalizza</span>
+      </div>
+      <div class="screen-pad" style="padding-bottom:120px;">
+        <h2 class="page-title">Aggiungi un messaggio</h2>
+        <div class="gift-chip" id="personalizeGiftChip"></div>
+        <div class="msg-box">
+          <textarea id="msgInput" maxlength="140" placeholder="Scrivi due parole..."></textarea>
+        </div>
+        <div class="suggested-wrap" id="suggestedWrap"></div>
+      </div>
+      <div class="flow-footer">
+        <button class="btn-primary" onclick="goToCheckout()">Continua</button>
+      </div>
+    </section>
+
+    <!-- CHECKOUT -->
+    <section class="screen" data-view="checkout">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <span class="topbar-title">Riepilogo</span>
+      </div>
+      <div class="screen-pad" style="padding-bottom:130px;">
+        <h2 class="page-title">Quasi fatto ❤️</h2>
+        <div class="checkout-card" id="checkoutCard"></div>
+        <div class="paycard">
+          <div>
+            <div class="l1">Metodo di pagamento</div>
+            <div class="l2">•••• •••• •••• 4242</div>
+          </div>
+          <div class="cardicon">💳</div>
+        </div>
+      </div>
+      <div class="flow-footer">
+        <button class="btn-primary" id="payBtn" onclick="sendMoment()">Regala</button>
+      </div>
+    </section>
+
+    <!-- RECEIVER VIEW -->
+    <section class="screen" data-view="receiver">
+      <div class="topbar">
+        <span class="topbar-title" style="margin-left:6px;">Cosa vede chi riceve</span>
+      </div>
+      <div class="screen-pad" id="receiverContent"></div>
+    </section>
+
+    <!-- WALLET / MOMENTI -->
+    <section class="screen" data-view="wallet">
+      <div class="screen-pad" style="padding-top:20px;">
+        <div class="brand" style="padding: 4px 0 0 0;"><span class="dot"></span>momento.</div>
+        <h2 class="page-title" style="padding-left:0;">I tuoi momenti</h2>
+        <div id="walletList" style="margin-top:8px;"></div>
+      </div>
+    </section>
+
+    <!-- ACTIVITY -->
+    <section class="screen" data-view="activity">
+      <div class="screen-pad" style="padding-top:20px;">
+        <div class="brand" style="padding: 4px 0 0 0;"><span class="dot"></span>momento.</div>
+        <h2 class="page-title" style="padding-left:0;">Attività</h2>
+        <div class="stats-row" style="margin-top:10px;">
+          <div class="stat-card"><div class="num">7</div><div class="lbl">momenti ricevuti</div></div>
+          <div class="stat-card"><div class="num">4</div><div class="lbl">momenti regalati</div></div>
+        </div>
+        <div class="section-label" style="margin-left:0;">I tuoi gesti</div>
+        <div id="timelineList"></div>
+      </div>
+    </section>
+
+    <!-- PROFILE -->
+    <section class="screen" data-view="profile">
+      <div class="screen-pad" style="padding-top:6px;">
+        <div class="profile-head">
+          <div class="profile-avatar">👩</div>
+          <h2>Sofia</h2>
+        </div>
+        <div class="stats-row">
+          <div class="stat-card"><div class="num">7</div><div class="lbl">momenti ricevuti</div></div>
+          <div class="stat-card"><div class="num">4</div><div class="lbl">momenti regalati</div></div>
+        </div>
+        <div class="section-label" style="margin-left:0;">I tuoi gesti</div>
+        <div id="profileTimeline"></div>
+        <div class="restart-row">
+          <button onclick="restartDemo()">Ricomincia la demo</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- HOW IT WORKS -->
+    <section class="screen" data-view="howitworks">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <span class="topbar-title">Come funziona</span>
+      </div>
+      <div class="screen-pad">
+        <h2 class="page-title" style="padding-left:0; margin-top:10px;">Un piccolo gesto, in quattro passaggi.</h2>
+        <div class="howitworks-step">
+          <div class="n">1</div>
+          <p><strong>Scegli un momento</strong>Un caffè, un gelato, un aperitivo. Qualcosa di piccolo e vero.</p>
+        </div>
+        <div class="howitworks-step">
+          <div class="n">2</div>
+          <p><strong>Scegli per chi</strong>Un amico, un famigliare, qualcuno a cui pensi in questo momento.</p>
+        </div>
+        <div class="howitworks-step">
+          <div class="n">3</div>
+          <p><strong>Aggiungi due parole</strong>Il gesto conta più del valore. Un messaggio lo rende personale.</p>
+        </div>
+        <div class="howitworks-step">
+          <div class="n">4</div>
+          <p><strong>La persona lo ritira</strong>Riceve una notifica, legge il tuo messaggio, e si sente pensata.</p>
+        </div>
+        <div style="padding: 18px 22px 0;">
+          <button class="btn-primary" style="width:100%;" onclick="goBack()">Ho capito</button>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- SENDING OVERLAY -->
+  <div id="sendingOverlay">
+    <div class="send-emojis">
+      <span id="se1"></span><span id="se2">→</span><span id="se3">❤️</span><span id="se4">→</span><span id="se5">✨</span>
+    </div>
+    <div class="sendlabel" id="sendLabel">Momento inviato ❤️</div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div id="bottomnav">
+    <button class="navitem active" data-tab="home" onclick="switchTab('home')"><span class="navicon">🏠</span>Home</button>
+    <button class="navitem" data-tab="wallet" onclick="switchTab('wallet')"><span class="navicon">🎁</span>Momenti</button>
+    <button class="navitem" data-tab="activity" onclick="switchTab('activity')"><span class="navicon">❤️</span>Attività</button>
+    <button class="navitem" data-tab="profile" onclick="switchTab('profile')"><span class="navicon">👤</span>Profilo</button>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const MOMENTS = [
+  { id:'coffee',    emoji:'☕', name:'Caffè',      price:3.50, line:'Perché anche un piccolo gesto può cambiare la giornata.' },
+  { id:'breakfast', emoji:'🥐', name:'Colazione',  price:7.00, line:'Un inizio di giornata un po\' più dolce.' },
+  { id:'icecream',  emoji:'🍦', name:'Gelato',     price:5.00, line:'Una piccola pausa, anche a distanza.' },
+  { id:'pizza',     emoji:'🍕', name:'Pizza',      price:12.00, line:'Perché stasera meriti qualcosa di buono.' },
+  { id:'aperitivo', emoji:'🍸', name:'Aperitivo',  price:15.00, line:'Un brindisi, anche se non siamo nello stesso posto.' },
+  { id:'dolce',     emoji:'🍰', name:'Dolce',      price:6.00, line:'Un pensiero dolce per tirarti su.' },
+  { id:'cinema',    emoji:'🎬', name:'Cinema',     price:12.00, line:'Un\'ora e mezza tutta per te, offerta con piacere.' },
+  { id:'pensiero',  emoji:'❤️', name:'Un pensiero', price:10.00, line:'A volte basta far sapere a qualcuno che ci pensi.' },
+];
+
+const CONTACTS = [
+  { name:'Sofia', emoji:'👩' },
+  { name:'Marco', emoji:'👨' },
+  { name:'Giulia', emoji:'👩' },
+  { name:'Luca',  emoji:'👨' },
+];
+
+// Prezzo reale per locale, per ogni tipo di momento — usato quando l'utente
+// sceglie "Personalizza il regalo" e vuole un locale specifico invece della rete aperta.
+const VENUE_CATALOG = {
+  coffee: [
+    { name:'Bar Centrale',       address:'Via Roma 12',      hours:'aperto fino alle 20:00', price:1.20 },
+    { name:'Caffè Moderno',      address:'Corso Italia 45',  hours:'aperto fino alle 19:00', price:1.50 },
+    { name:'Pasticceria Bella',  address:'Piazza Duomo 3',   hours:'aperto fino alle 18:30', price:1.80 },
+  ],
+  breakfast: [
+    { name:'Pasticceria Bella',  address:'Piazza Duomo 3',   hours:'aperto fino alle 18:30', price:6.50 },
+    { name:'Bar Centrale',       address:'Via Roma 12',      hours:'aperto fino alle 20:00', price:5.90 },
+  ],
+  icecream: [
+    { name:'Gelateria del Corso', address:'Corso Italia 22', hours:'aperto fino alle 23:00', price:4.00 },
+    { name:'Bar Centrale',        address:'Via Roma 12',     hours:'aperto fino alle 20:00', price:4.50 },
+  ],
+  pizza: [
+    { name:'Pizzeria Nazionale', address:'Via Garibaldi 8',  hours:'aperto fino alle 23:30', price:9.50 },
+    { name:'Trattoria Sud',      address:'Vicolo Corto 2',   hours:'aperto fino alle 22:30', price:11.00 },
+  ],
+  aperitivo: [
+    { name:'Bar Centrale',       address:'Via Roma 12',      hours:'aperto fino alle 20:00', price:9.00 },
+    { name:'Vinoteca Sud',       address:'Via Garibaldi 8',  hours:'aperto fino alle 23:00', price:12.00 },
+    { name:'Rooftop 12',         address:'Piazza Duomo 12',  hours:'aperto fino alle 01:00', price:16.50 },
+  ],
+  dolce: [
+    { name:'Pasticceria Bella',  address:'Piazza Duomo 3',   hours:'aperto fino alle 18:30', price:4.80 },
+  ],
+  cinema: [
+    { name:'Cinema Astra',       address:'Via delle Arti 5', hours:'ultimo spettacolo 22:30', price:9.00 },
+  ],
+  pensiero: [
+    { name:'Bar Centrale',       address:'Via Roma 12',      hours:'aperto fino alle 20:00', price:10.00 },
+    { name:'Pasticceria Bella',  address:'Piazza Duomo 3',   hours:'aperto fino alle 18:30', price:9.50 },
+  ],
+};
+
+const SUGGESTED_PHRASES = [
+  'Pensavo a te ❤️',
+  'Una piccola pausa tutta per te',
+  'Te lo meriti',
+  'Per rendere migliore la tua giornata',
+];
+
+const WALLET_SEED = [
+  { emoji:'☕', name:'Caffè', from:'Marco', status:'pending' },
+  { emoji:'🥐', name:'Colazione', from:'Giulia', status:'used' },
+];
+
+const TIMELINE_SEED = [
+  { emoji:'☕', text:'Hai regalato un caffè a Marco', time:'ieri' },
+  { emoji:'🍦', text:'Hai ricevuto un gelato da Giulia', time:'2 giorni fa' },
+];
+
+/* ============ STATE ============ */
+let state = {
+  wallet: [...WALLET_SEED],
+  timeline: [...TIMELINE_SEED],
+  flow: { moment:null, venue:null, recipient:null, message:'' },
+};
+
+let history = ['home'];
+
+/* ============ RENDER HELPERS ============ */
+function fmtPrice(n){ return '€' + n.toFixed(2).replace('.', ','); }
+function currentPrice(m){ return state.flow.venue ? state.flow.venue.price : m.price; }
+function minVenuePrice(momentId){
+  const venues = VENUE_CATALOG[momentId] || [];
+  if(venues.length === 0) return null;
+  return Math.min(...venues.map(v => v.price));
+}
+
+function renderMomentGrid(){
+  const grid = document.getElementById('momentGrid');
+  grid.innerHTML = MOMENTS.map(m => `
+    <button class="moment-card" onclick="openDetail('${m.id}')">
+      <span class="emoji">${m.emoji}</span>
+      <span class="name">${m.name}</span>
+    </button>
+  `).join('');
+}
+
+function renderDetail(momentId){
+  const m = MOMENTS.find(x => x.id === momentId);
+  const min = minVenuePrice(momentId);
+  const box = document.getElementById('detailContent');
+  box.innerHTML = `
+    <div class="detail-hero">
+      <div class="detail-emoji-wrap">${m.emoji}</div>
+      <h2>Un ${m.name.toLowerCase()} per te</h2>
+      <p class="sub">${m.line}</p>
+      ${min !== null ? `<div class="detail-price">da ${fmtPrice(min)}</div><p class="sub" style="margin-top:6px;">Il prezzo esatto dipende dal locale che scegli.</p>` : ''}
+    </div>
+    <div class="detail-actions">
+      <button class="btn-primary" onclick="chooseMomentWithVenue('${m.id}')">Scegli il locale</button>
+    </div>
+  `;
+}
+
+function renderContacts(){
+  const grid = document.getElementById('contactGrid');
+  grid.innerHTML = CONTACTS.map(c => `
+    <button class="contact-card ${state.flow.recipient===c.name ? 'selected':''}" onclick="chooseRecipient('${c.name}')">
+      <span class="avatar">${c.emoji}</span>
+      <span class="cname">${c.name}</span>
+    </button>
+  `).join('') + `<button class="invite-card" onclick="alert('In questa demo puoi scegliere tra i contatti già presenti.')">+ Invita qualcuno</button>`;
+}
+
+function renderPersonalize(){
+  const m = MOMENTS.find(x => x.id === state.flow.moment);
+  const v = state.flow.venue;
+  document.getElementById('personalizeGiftChip').innerHTML = `
+    <span class="emoji">${m.emoji}</span>
+    <span class="txt"><strong>Un ${m.name.toLowerCase()} per ${state.flow.recipient}</strong><span>${v ? v.name + ' · ' : ''}${fmtPrice(currentPrice(m))}</span></span>
+  `;
+  const input = document.getElementById('msgInput');
+  if(!input.value){ input.placeholder = 'So che oggi ne hai proprio bisogno ❤️'; }
+  document.getElementById('suggestedWrap').innerHTML = SUGGESTED_PHRASES.map(p => `
+    <button class="chip" onclick="pickPhrase('${p.replace(/'/g, "\\'")}')">${p}</button>
+  `).join('');
+}
+
+function pickPhrase(p){
+  document.getElementById('msgInput').value = p;
+}
+
+function renderCheckout(){
+  const m = MOMENTS.find(x => x.id === state.flow.moment);
+  const v = state.flow.venue;
+  const price = currentPrice(m);
+  const msg = state.flow.message || document.getElementById('msgInput').placeholder;
+  document.getElementById('checkoutCard').innerHTML = `
+    <div class="checkout-row">
+      <div class="left">
+        <span class="emoji">${m.emoji}</span>
+        <div><div class="l1">Un ${m.name.toLowerCase()}</div><div class="l2">Per ${state.flow.recipient}</div></div>
+      </div>
+      <div class="right">${fmtPrice(price)}</div>
+    </div>
+    ${v ? `
+    <div class="checkout-row">
+      <div class="left"><div class="l1">Locale</div></div>
+      <div class="right" style="font-family:'Inter'; font-size:13px; font-weight:600;">${v.name}<div style="font-weight:400; color:var(--ink-soft); font-size:12px; margin-top:2px;">${v.address}</div></div>
+    </div>` : ''}
+    <div class="checkout-row">
+      <div class="left"><div class="l1">Messaggio</div></div>
+      <div class="msgtext">"${msg}"</div>
+    </div>
+  `;
+  document.getElementById('payBtn').textContent = 'Regala ' + fmtPrice(price);
+}
+
+function renderReceiver(){
+  const m = MOMENTS.find(x => x.id === state.flow.moment);
+  const v = state.flow.venue;
+  const msg = state.flow.message || document.getElementById('msgInput').placeholder;
+  document.getElementById('receiverContent').innerHTML = `
+    <div class="receiver-wrap">
+      <div class="lead">${state.flow.recipient}, qualcuno ha pensato a te. ❤️</div>
+      <h2>Hai ricevuto un piccolo momento:</h2>
+      <div class="receiver-gift">${m.emoji}</div>
+      <div class="giftname">Un ${m.name.toLowerCase()}</div>
+      <p class="receiver-quote">"${msg}"</p>
+      <button class="btn-primary" onclick="redeemMoment()">Ritira il tuo momento</button>
+      <div class="receiver-note">${v ? `Da ritirare da ${v.name}, ${v.address} · ${v.hours}` : 'Valido presso locali aderenti'}</div>
+    </div>
+  `;
+}
+
+function renderWallet(){
+  const list = document.getElementById('walletList');
+  if(state.wallet.length === 0){
+    list.innerHTML = `<div class="empty-hint">Non hai ancora ricevuto nessun momento.<br>Quando qualcuno pensa a te, apparirà qui.</div>`;
+    return;
+  }
+  list.innerHTML = state.wallet.map(w => `
+    <div class="wallet-item">
+      <div class="emoji-wrap">${w.emoji}</div>
+      <div class="info">
+        <strong>${w.name}</strong>
+        <span>Regalato da ${w.from}</span>
+      </div>
+      <span class="status-pill ${w.status}">${w.status==='pending' ? '● Da utilizzare' : '✓ Utilizzata'}</span>
+    </div>
+  `).join('');
+}
+
+function renderTimeline(){
+  const html = state.timeline.map(t => `
+    <div class="timeline-item">
+      <div class="dot-emoji">${t.emoji}</div>
+      <div class="txt"><p>${t.text}</p><span>${t.time}</span></div>
+    </div>
+  `).join('');
+  document.getElementById('timelineList').innerHTML = html;
+  document.getElementById('profileTimeline').innerHTML = html;
+}
+
+/* ============ NAVIGATION ============ */
+function showScreen(name, opts={}){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active','behind'));
+  const el = document.querySelector(`.screen[data-view="${name}"]`);
+  el.classList.add('active');
+  el.scrollTop = 0;
+  const nav = document.getElementById('bottomnav');
+  const flowViews = ['detail','venuesearch','recipient','personalize','checkout','receiver','howitworks'];
+  nav.style.display = flowViews.includes(name) ? 'none' : 'flex';
+}
+
+function pushView(name){
+  history.push(name);
+  showScreen(name);
+}
+
+function goBack(){
+  if(history.length > 1){
+    history.pop();
+    showScreen(history[history.length-1]);
+  }
+}
+
+function switchTab(tab){
+  history = [tab];
+  showScreen(tab);
+  document.querySelectorAll('.navitem').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
+  if(tab==='wallet') renderWallet();
+  if(tab==='activity') renderTimeline();
+}
+
+function scrollToGrid(){
+  document.getElementById('grid-anchor').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+/* ============ FLOW ACTIONS ============ */
+function openDetail(momentId){
+  state.flow.moment = momentId;
+  renderDetail(momentId);
+  pushView('detail');
+}
+
+function chooseMomentWithVenue(momentId){
+  state.flow.moment = momentId;
+  state.flow.venue = null;
+  document.getElementById('venueSearchInput').value = '';
+  document.getElementById('venueContinueBtn').classList.add('disabled');
+  renderVenues();
+  pushView('venuesearch');
+}
+
+function renderVenues(){
+  const query = (document.getElementById('venueSearchInput').value || '').toLowerCase().trim();
+  const venues = (VENUE_CATALOG[state.flow.moment] || []).filter(v =>
+    !query || v.name.toLowerCase().includes(query) || v.address.toLowerCase().includes(query)
+  );
+  const m = MOMENTS.find(x => x.id === state.flow.moment);
+  const list = document.getElementById('venueList');
+  if(venues.length === 0){
+    list.innerHTML = `<div class="venue-empty">Nessun locale trovato per "${m.name.toLowerCase()}" in questa zona.</div>`;
+    return;
+  }
+  list.innerHTML = venues.map((v,i) => `
+    <button class="venue-card ${state.flow.venue && state.flow.venue.name===v.name ? 'selected':''}" onclick="chooseVenue(${i})">
+      <div class="vinfo">
+        <div class="vname">${v.name}</div>
+        <div class="vaddr">${v.address}</div>
+        <div class="vhours">${v.hours}</div>
+      </div>
+      <div class="vprice">${fmtPrice(v.price)}</div>
+    </button>
+  `).join('');
+}
+
+function filterVenues(){ renderVenues(); }
+
+function chooseVenue(index){
+  const venues = (VENUE_CATALOG[state.flow.moment] || []).filter(v => {
+    const query = (document.getElementById('venueSearchInput').value || '').toLowerCase().trim();
+    return !query || v.name.toLowerCase().includes(query) || v.address.toLowerCase().includes(query);
+  });
+  state.flow.venue = venues[index];
+  renderVenues();
+  document.getElementById('venueContinueBtn').classList.remove('disabled');
+}
+
+function confirmVenueAndContinue(){
+  if(!state.flow.venue) return;
+  state.flow.recipient = null;
+  document.getElementById('recipientContinueBtn').classList.add('disabled');
+  renderContacts();
+  pushView('recipient');
+}
+
+function chooseRecipient(name){
+  state.flow.recipient = name;
+  renderContacts();
+  document.getElementById('recipientContinueBtn').classList.remove('disabled');
+}
+
+function goToPersonalize(){
+  if(!state.flow.recipient) return;
+  document.getElementById('msgInput').value = '';
+  renderPersonalize();
+  pushView('personalize');
+}
+
+function goToCheckout(){
+  state.flow.message = document.getElementById('msgInput').value.trim();
+  renderCheckout();
+  pushView('checkout');
+}
+
+function sendMoment(){
+  const overlay = document.getElementById('sendingOverlay');
+  overlay.classList.add('active');
+  ['se1','se3','se5'].forEach((id,i) => {
+    setTimeout(()=> document.getElementById(id).classList.add('show'), 150 + i*260);
+  });
+  document.getElementById('se2').classList.add('show');
+  document.getElementById('se4').classList.add('show');
+  setTimeout(()=> document.getElementById('sendLabel').classList.add('show'), 700);
+
+  setTimeout(()=>{
+    overlay.classList.remove('active');
+    ['se1','se2','se3','se4','se5'].forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('sendLabel').classList.remove('show');
+    renderReceiver();
+    history = ['home','receiver'];
+    showScreen('receiver');
+  }, 1900);
+}
+
+function redeemMoment(){
+  const m = MOMENTS.find(x => x.id === state.flow.moment);
+  state.wallet.unshift({ emoji:m.emoji, name:'Un ' + m.name.toLowerCase(), from:'te stesso', status:'pending' });
+  state.timeline.unshift({ emoji:m.emoji, text:`Hai regalato un ${m.name.toLowerCase()} a ${state.flow.recipient}`, time:'ora' });
+  switchTab('wallet');
+}
+
+function openHowItWorks(){ pushView('howitworks'); }
+
+function startDemo(){
+  chooseMomentWithVenue('coffee');
+  setTimeout(()=>{
+    chooseVenue(0);
+    confirmVenueAndContinue();
+    setTimeout(()=> chooseRecipient('Sofia'), 350);
+  }, 500);
+}
+
+function restartDemo(){
+  state = { wallet:[...WALLET_SEED], timeline:[...TIMELINE_SEED], flow:{moment:null, venue:null, recipient:null, message:''} };
+  switchTab('home');
+}
+
+/* ============ INIT ============ */
+renderMomentGrid();
+renderTimeline();
+switchTab('home');
+</script>
+</body>
+</html>
