@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>momento. per i locali — verifica e riscatta</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,650&family=Inter:wght@400;500;600&family=Roboto+Mono:wght@500&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --cream:#F7F1E7;
+    --cream-deep:#EFE7D6;
+    --white:#FFFDF9;
+    --ink:#2A241C;
+    --ink-soft:#7A7060;
+    --ink-faint:#B8AD98;
+    --accent:#C85A3E;
+    --accent-deep:#A8462E;
+    --accent-soft:#F1DACE;
+    --gold:#DFA24C;
+    --green:#5C7A5A;
+    --green-soft:#E1E9DD;
+    --line:#E6DCC8;
+    --shadow: 0 18px 40px -20px rgba(42,36,28,0.28);
+    --shadow-soft: 0 8px 22px -14px rgba(42,36,28,0.22);
+    --radius-l: 26px;
+    --radius-m: 18px;
+    --radius-s: 12px;
+  }
+
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ height:100%; }
+  body{
+    margin:0;
+    font-family:'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    background: var(--cream-deep);
+    color:var(--ink);
+    display:flex;
+    align-items:flex-start;
+    justify-content:center;
+    min-height:100vh;
+    padding: 28px 16px;
+  }
+  h1,h2,h3{ font-family:'Fraunces', serif; margin:0; font-weight:600; letter-spacing:-0.01em; }
+  p{ margin:0; }
+  button{ font-family:inherit; border:none; background:none; cursor:pointer; -webkit-appearance:none; appearance:none; }
+  input{ font-family:inherit; }
+  ::selection{ background: var(--accent-soft); }
+
+  #shell{
+    width: 100%;
+    max-width: 420px;
+    background: var(--cream);
+    border-radius: 40px;
+    box-shadow: var(--shadow), 0 0 0 10px #1c1712, 0 0 0 11px #34291d;
+    overflow:hidden;
+    position:relative;
+    height: min(880px, 92vh);
+    display:flex;
+    flex-direction:column;
+  }
+  @media (min-width: 700px){ body{ padding: 46px 16px; } }
+  @media (max-width: 460px){
+    #shell{ border-radius:0; box-shadow:none; max-width:100%; height:100vh; height:100dvh; }
+    body{ padding:0; }
+  }
+
+  #notch{
+    height:30px; flex-shrink:0; display:flex; align-items:center; justify-content:center; position:relative; z-index:5;
+  }
+  #notch::before{ content:''; width:90px; height:20px; background:#1c1712; border-radius: 0 0 16px 16px; }
+
+  #viewport{ flex:1; position:relative; overflow:hidden; }
+
+  .screen{
+    position:absolute; inset:0; display:flex; flex-direction:column; background: var(--cream);
+    transform: translateX(100%); transition: transform .38s cubic-bezier(.32,.72,0,1);
+    overflow-y:auto; -ms-overflow-style:none; scrollbar-width:none;
+  }
+  .screen::-webkit-scrollbar{ display:none; }
+  .screen.active{ transform: translateX(0); z-index:2; }
+  .screen[data-root="true"]{ transition:none; }
+
+  .screen-pad{ padding: 20px 22px 110px; flex:1; }
+
+  .topbar{ display:flex; align-items:center; gap:12px; padding: 14px 18px 6px; flex-shrink:0; }
+  .backbtn{
+    width:38px; height:38px; border-radius:50%; background: var(--white);
+    display:flex; align-items:center; justify-content:center; font-size:17px;
+    box-shadow: var(--shadow-soft); color: var(--ink); flex-shrink:0;
+  }
+  .topbar-title{ font-size:15px; font-weight:600; color:var(--ink-soft); }
+
+  .brand{ display:flex; align-items:center; gap:8px; font-family:'Fraunces'; font-weight:600; font-size:19px; color:var(--ink); }
+  .brand .dot{ width:9px; height:9px; border-radius:50%; background: var(--accent); display:inline-block; transform: translateY(1px); }
+  .brand .tag{ font-family:'Inter'; font-size:11px; font-weight:600; color: var(--ink-soft); background: var(--white); padding:3px 9px; border-radius:999px; margin-left:2px; }
+
+  .venue-header{ display:flex; align-items:center; gap:12px; padding: 18px 22px 4px; }
+  .venue-avatar{
+    width:46px; height:46px; border-radius:14px; background: var(--accent-soft);
+    display:flex; align-items:center; justify-content:center; font-size:21px; flex-shrink:0;
+  }
+  .venue-header .vname{ font-size:15px; font-weight:600; }
+  .venue-header .vsub{ font-size:12px; color: var(--ink-soft); margin-top:2px; }
+
+  .stats-row{ display:flex; gap:12px; padding: 18px 22px 0; }
+  .stat-card{ flex:1; background: var(--white); border-radius: var(--radius-m); padding: 16px 14px; box-shadow: var(--shadow-soft); text-align:center; }
+  .stat-card .num{ font-family:'Fraunces'; font-size:24px; color:var(--accent-deep); }
+  .stat-card .lbl{ font-size:11.5px; color:var(--ink-soft); margin-top:4px; }
+
+  .section-label{ font-family:'Fraunces'; font-size:18px; font-weight:600; margin: 28px 4px 12px; color:var(--ink); }
+
+  .verify-panel{ margin: 0 4px; background: var(--ink); border-radius: var(--radius-l); padding: 22px 20px; color:#fff; }
+  .verify-panel .vp-title{ font-family:'Fraunces'; font-size:18px; }
+  .verify-panel .vp-sub{ font-size:13px; color:#D9D2C4; margin-top:6px; line-height:1.5; }
+  .verify-actions{ display:flex; gap:10px; margin-top:18px; }
+  .btn-light{
+    flex:1; background:#fff; color: var(--ink); font-weight:600; font-size:13.5px;
+    padding: 13px 10px; border-radius:999px; text-align:center;
+  }
+  .btn-light:active{ transform: scale(.97); }
+  .btn-outline-light{
+    flex:1; background: transparent; color:#fff; font-weight:600; font-size:13.5px;
+    padding: 13px 10px; border-radius:999px; text-align:center; border: 1.5px solid rgba(255,255,255,0.35);
+  }
+  .btn-outline-light:active{ transform: scale(.97); }
+
+  .queue-item{
+    margin: 0 4px 12px; background: var(--white); border-radius: var(--radius-m);
+    padding: 14px 14px; display:flex; align-items:center; gap:12px; box-shadow: var(--shadow-soft);
+  }
+  .queue-item .emoji-wrap{
+    width:44px; height:44px; border-radius:12px; background: var(--cream-deep);
+    display:flex; align-items:center; justify-content:center; font-size:20px; flex-shrink:0;
+  }
+  .queue-item .info{ flex:1; min-width:0; }
+  .queue-item .info strong{ font-size:14px; display:block; }
+  .queue-item .info span{ font-size:12px; color:var(--ink-soft); }
+  .queue-item .verifybtn{
+    font-size:12.5px; font-weight:600; color: var(--accent-deep); background: var(--accent-soft);
+    padding: 9px 14px; border-radius:999px; flex-shrink:0;
+  }
+  .queue-item .verifybtn:active{ transform: scale(.95); }
+
+  .empty-hint{ text-align:center; color:var(--ink-faint); font-size:13px; padding: 26px 20px; line-height:1.6; }
+
+  /* code entry */
+  .code-input-wrap{ margin: 22px 22px 0; }
+  .code-input{
+    width:100%; text-align:center; font-family:'Roboto Mono', monospace; font-size:28px;
+    letter-spacing: 8px; padding: 20px 14px 20px 22px; border-radius: var(--radius-m);
+    border: 1.5px solid var(--line); background: var(--white); color: var(--ink);
+    outline:none; box-shadow: var(--shadow-soft);
+  }
+  .code-input:focus{ border-color: var(--accent); }
+  .code-hint{ text-align:center; font-size:12.5px; color: var(--ink-faint); margin-top:10px; }
+  .code-error{ text-align:center; font-size:12.5px; color: var(--accent-deep); margin-top:10px; min-height:16px; font-weight:600; }
+
+  .flow-footer{
+    position:absolute; left:0; right:0; bottom:0; padding: 14px 22px calc(18px + env(safe-area-inset-bottom,0px));
+    background: linear-gradient(to top, var(--cream) 60%, transparent);
+  }
+  .btn-primary{
+    background: var(--accent); color:#fff; font-weight:600; font-size:14.5px;
+    padding: 14px 22px; border-radius:999px; box-shadow: 0 14px 26px -12px rgba(168,70,46,0.55);
+    width:100%; text-align:center; display:block;
+  }
+  .btn-primary:active{ transform: scale(.97); }
+  .btn-primary.disabled{ opacity:.4; pointer-events:none; }
+
+  /* found detail */
+  .found-hero{ display:flex; flex-direction:column; align-items:center; text-align:center; padding: 20px 20px 6px; }
+  .found-emoji-wrap{
+    width:104px; height:104px; border-radius:50%; background: var(--accent-soft);
+    display:flex; align-items:center; justify-content:center; font-size:48px; margin-bottom:18px;
+  }
+  .found-hero h2{ font-size:22px; }
+  .found-card{
+    margin: 22px 4px 0; background: var(--white); border-radius: var(--radius-m);
+    box-shadow: var(--shadow-soft); overflow:hidden;
+  }
+  .found-row{ display:flex; align-items:center; justify-content:space-between; padding:14px 16px; border-bottom: 1px solid var(--line); gap:12px; }
+  .found-row:last-child{ border-bottom:none; }
+  .found-row .l1{ font-size:12.5px; color:var(--ink-soft); }
+  .found-row .r1{ font-size:14.5px; font-weight:600; text-align:right; }
+  .found-quote{ margin: 18px 4px 0; padding: 14px 16px; background: var(--cream-deep); border-radius: var(--radius-m); font-size:13.5px; color: var(--ink-soft); font-style:italic; text-align:center; }
+
+  /* success */
+  #successOverlay{
+    position:absolute; inset:0; z-index:50; background: var(--cream);
+    display:flex; flex-direction:column; align-items:center; justify-content:center;
+    opacity:0; pointer-events:none; transition: opacity .35s ease;
+  }
+  #successOverlay.active{ opacity:1; pointer-events:all; }
+  .success-circle{
+    width:110px; height:110px; border-radius:50%; background: var(--green-soft);
+    display:flex; align-items:center; justify-content:center; font-size:48px;
+    transform: scale(.7); opacity:0; transition: transform .4s cubic-bezier(.32,1.6,.4,1), opacity .4s ease;
+  }
+  #successOverlay.active .success-circle{ transform: scale(1); opacity:1; }
+  #successOverlay .slabel{ margin-top:22px; font-family:'Fraunces'; font-size:19px; opacity:0; transition: opacity .3s ease .2s; }
+  #successOverlay.active .slabel{ opacity:1; }
+  #successOverlay .ssub{ margin-top:8px; font-size:13px; color: var(--ink-soft); opacity:0; transition: opacity .3s ease .3s; }
+  #successOverlay.active .ssub{ opacity:1; }
+
+  /* history */
+  .history-item{
+    margin: 0 4px 12px; background: var(--white); border-radius: var(--radius-m);
+    padding: 14px 14px; display:flex; align-items:center; gap:12px; box-shadow: var(--shadow-soft);
+  }
+  .history-item .emoji-wrap{
+    width:42px; height:42px; border-radius:12px; background: var(--green-soft);
+    display:flex; align-items:center; justify-content:center; font-size:18px; flex-shrink:0;
+  }
+  .history-item .info strong{ font-size:13.5px; display:block; }
+  .history-item .info span{ font-size:11.5px; color:var(--ink-soft); }
+  .history-item .val{ margin-left:auto; font-family:'Fraunces'; font-size:14.5px; color: var(--ink); text-align:right; }
+  .history-item .val .time{ display:block; font-family:'Inter'; font-size:10.5px; color: var(--ink-faint); margin-top:2px; }
+
+  .daygroup-label{ font-size:12px; font-weight:600; color: var(--ink-faint); margin: 20px 8px 10px; text-transform: lowercase; }
+
+  /* venue profile */
+  .profile-head{ display:flex; flex-direction:column; align-items:center; padding: 30px 20px 6px; text-align:center; }
+  .profile-avatar{ width:72px; height:72px; border-radius:20px; background: var(--accent-soft); display:flex; align-items:center; justify-content:center; font-size:30px; margin-bottom:12px; }
+  .profile-head h2{ font-size:20px; }
+  .profile-head .cat{ font-size:12.5px; color: var(--ink-soft); margin-top:4px; }
+
+  .info-list{ margin: 20px 4px 0; background: var(--white); border-radius: var(--radius-m); box-shadow: var(--shadow-soft); overflow:hidden; }
+  .info-row{ display:flex; align-items:center; justify-content:space-between; padding: 14px 16px; border-bottom:1px solid var(--line); gap:12px; }
+  .info-row:last-child{ border-bottom:none; }
+  .info-row .l1{ font-size:13.5px; color: var(--ink-soft); }
+  .info-row .r1{ font-size:13.5px; font-weight:600; text-align:right; }
+
+  .toggle{ width:44px; height:26px; border-radius:999px; background: var(--green); position:relative; flex-shrink:0; }
+  .toggle::after{ content:''; position:absolute; top:3px; left:21px; width:20px; height:20px; border-radius:50%; background:#fff; transition: left .2s ease; }
+  .toggle.off{ background: var(--ink-faint); }
+  .toggle.off::after{ left:3px; }
+
+  .qr-box{
+    margin: 20px 4px 0; background: var(--white); border-radius: var(--radius-m); box-shadow: var(--shadow-soft);
+    padding: 22px; display:flex; flex-direction:column; align-items:center; gap:12px;
+  }
+  .qr-grid{
+    width:132px; height:132px; border-radius:12px; background: var(--ink);
+    display:grid; grid-template-columns: repeat(8, 1fr); grid-template-rows: repeat(8, 1fr); gap:3px; padding:10px;
+  }
+  .qr-grid span{ background: var(--white); border-radius:1px; }
+  .qr-box .qrlabel{ font-size:12px; color: var(--ink-soft); text-align:center; }
+  .qr-box .qrcode-text{ font-family:'Roboto Mono', monospace; font-size:13px; letter-spacing:2px; color: var(--ink); }
+
+  #bottomnav{
+    display:flex; justify-content:space-around; align-items:center;
+    padding: 10px 8px calc(12px + env(safe-area-inset-bottom,0px));
+    background: rgba(247,241,231,0.92); backdrop-filter: blur(10px);
+    border-top: 1px solid var(--line); position:absolute; left:0; right:0; bottom:0; z-index:20;
+  }
+  .navitem{ display:flex; flex-direction:column; align-items:center; gap:3px; color: var(--ink-faint); font-size:10.5px; font-weight:600; padding:4px 12px; border-radius:14px; }
+  .navitem .navicon{ font-size:19px; }
+  .navitem.active{ color: var(--accent); }
+</style>
+</head>
+<body>
+
+<div id="shell">
+  <div id="notch"></div>
+  <div id="viewport">
+
+    <!-- HOME / OGGI -->
+    <section class="screen active" data-view="home" data-root="true">
+      <div class="screen-pad" style="padding-top:0;">
+        <div style="display:flex; align-items:center; justify-content:space-between; padding: 18px 0 0;">
+          <div class="brand"><span class="dot"></span>momento.<span class="tag">per i locali</span></div>
+        </div>
+
+        <div class="venue-header">
+          <div class="venue-avatar">☕</div>
+          <div>
+            <div class="vname">Bar Centrale</div>
+            <div class="vsub">Via Roma 12 · aperto ora</div>
+          </div>
+        </div>
+
+        <div class="stats-row">
+          <div class="stat-card"><div class="num" id="statToday">3</div><div class="lbl">riscattati oggi</div></div>
+          <div class="stat-card"><div class="num" id="statMonth">47</div><div class="lbl">questo mese</div></div>
+        </div>
+
+        <div class="section-label">Verifica un momento</div>
+        <div class="verify-panel">
+          <div class="vp-title">Un cliente ha un momento da ritirare?</div>
+          <div class="vp-sub">Inquadra il suo codice o inseriscilo a mano per confermare il riscatto.</div>
+          <div class="verify-actions">
+            <button class="btn-light" onclick="openScan()">Scansiona</button>
+            <button class="btn-outline-light" onclick="openCodeEntry()">Inserisci codice</button>
+          </div>
+        </div>
+
+        <div class="section-label">In arrivo adesso</div>
+        <div id="queueList"></div>
+      </div>
+    </section>
+
+    <!-- CODE ENTRY -->
+    <section class="screen" data-view="codeentry">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <span class="topbar-title">Inserisci codice</span>
+      </div>
+      <div class="screen-pad" style="padding-bottom:130px;">
+        <h2 style="font-size:21px; padding: 6px 4px 0; max-width:280px;">Chiedi al cliente il codice del suo momento.</h2>
+        <div class="code-input-wrap">
+          <input class="code-input" id="codeInput" maxlength="6" inputmode="numeric" placeholder="——————" oninput="onCodeInput(this)">
+        </div>
+        <div class="code-hint">Codice a 6 cifre, visibile nella sua app</div>
+        <div class="code-error" id="codeError"></div>
+      </div>
+      <div class="flow-footer">
+        <button class="btn-primary disabled" id="codeSubmitBtn" onclick="submitCode()">Cerca momento</button>
+      </div>
+    </section>
+
+    <!-- SCAN (simulated) -->
+    <section class="screen" data-view="scan">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <span class="topbar-title">Scansiona il codice</span>
+      </div>
+      <div class="screen-pad" style="display:flex; flex-direction:column; align-items:center; justify-content:center; gap:26px; padding-top:40px;">
+        <div style="width:220px; height:220px; border-radius:28px; border:2.5px dashed var(--ink-faint); display:flex; align-items:center; justify-content:center; font-size:52px; background: var(--white);">📷</div>
+        <p style="text-align:center; color:var(--ink-soft); font-size:14px; max-width:240px; line-height:1.5;">Inquadra il codice mostrato nell'app del cliente. In questa demo simuliamo la scansione.</p>
+        <button class="btn-primary" style="width:auto; padding-left:28px; padding-right:28px;" onclick="simulateScan()">Simula scansione</button>
+      </div>
+    </section>
+
+    <!-- FOUND / DETAIL -->
+    <section class="screen" data-view="found">
+      <div class="topbar">
+        <button class="backbtn" onclick="goBack()">←</button>
+        <span class="topbar-title">Momento trovato</span>
+      </div>
+      <div class="screen-pad" style="padding-bottom:130px;" id="foundContent"></div>
+      <div class="flow-footer">
+        <button class="btn-primary" onclick="confirmRedeem()">Conferma riscatto</button>
+      </div>
+    </section>
+
+    <!-- STORICO -->
+    <section class="screen" data-view="storico">
+      <div class="screen-pad" style="padding-top:20px;">
+        <div class="brand"><span class="dot"></span>momento.<span class="tag">per i locali</span></div>
+        <h2 style="font-size:22px; padding: 16px 4px 0;">Storico riscatti</h2>
+        <div id="historyList" style="margin-top:6px;"></div>
+      </div>
+    </section>
+
+    <!-- LOCALE / PROFILE -->
+    <section class="screen" data-view="locale">
+      <div class="screen-pad" style="padding-top:6px;">
+        <div class="profile-head">
+          <div class="profile-avatar">☕</div>
+          <h2>Bar Centrale</h2>
+          <div class="cat">Bar & caffetteria · Via Roma 12</div>
+        </div>
+
+        <div class="info-list">
+          <div class="info-row"><span class="l1">Locale aderente</span><span class="toggle" id="activeToggle" onclick="toggleActive()"></span></div>
+          <div class="info-row"><span class="l1">Referente</span><span class="r1">Anna B.</span></div>
+          <div class="info-row"><span class="l1">Momenti accettati</span><span class="r1">Tutti</span></div>
+        </div>
+
+        <div class="qr-box">
+          <div class="qr-grid" id="qrGrid"></div>
+          <div class="qrlabel">Il codice del tuo locale</div>
+          <div class="qrcode-text">BAR-CENTRALE-12</div>
+        </div>
+      </div>
+    </section>
+
+  </div>
+
+  <!-- SUCCESS OVERLAY -->
+  <div id="successOverlay">
+    <div class="success-circle">✓</div>
+    <div class="slabel">Riscattato ❤️</div>
+    <div class="ssub" id="successSub">Momento consegnato</div>
+  </div>
+
+  <!-- BOTTOM NAV -->
+  <div id="bottomnav">
+    <button class="navitem active" data-tab="home" onclick="switchTab('home')"><span class="navicon">🏠</span>Oggi</button>
+    <button class="navitem" data-tab="storico" onclick="switchTab('storico')"><span class="navicon">📋</span>Storico</button>
+    <button class="navitem" data-tab="locale" onclick="switchTab('locale')"><span class="navicon">🏪</span>Locale</button>
+  </div>
+</div>
+
+<script>
+/* ============ DATA ============ */
+const GIFT_TYPES = [
+  { emoji:'☕', name:'Caffè', value:3.50 },
+  { emoji:'🥐', name:'Colazione', value:7.00 },
+  { emoji:'🍦', name:'Gelato', value:5.00 },
+  { emoji:'🍕', name:'Pizza', value:12.00 },
+  { emoji:'🍸', name:'Aperitivo', value:15.00 },
+  { emoji:'🍰', name:'Dolce', value:6.00 },
+  { emoji:'🎬', name:'Cinema', value:12.00 },
+  { emoji:'❤️', name:'Un pensiero', value:10.00 },
+];
+const NAMES = ['Sofia','Marco','Giulia','Luca','Elena','Davide'];
+const QUOTES = [
+  'Pensavo a te ❤️','Una piccola pausa tutta per te','Te lo meriti','Per rendere migliore la tua giornata','So che oggi ne hai proprio bisogno ❤️'
+];
+
+let state = {
+  today: 3,
+  month: 47,
+  queue: [
+    { code:'482913', for:'Luca', from:'Elena', gift: GIFT_TYPES[3], quote:'Perché stasera meriti qualcosa di buono.' },
+    { code:'736201', for:'Giulia', from:'Davide', gift: GIFT_TYPES[4], quote:'Un brindisi, anche se non siamo nello stesso posto.' },
+  ],
+  history: [
+    { code:'910442', for:'Sofia', from:'Marco', gift: GIFT_TYPES[0], time:'oggi, 09:14' },
+    { code:'558102', for:'Marco', from:'Giulia', gift: GIFT_TYPES[2], time:'ieri, 18:40' },
+    { code:'204971', for:'Luca', from:'Sofia', gift: GIFT_TYPES[6], time:'2 giorni fa, 21:05' },
+  ],
+  pendingFound: null,
+};
+
+let history_stack = ['home'];
+
+/* ============ RENDER ============ */
+function fmtPrice(n){ return '€' + n.toFixed(2).replace('.', ','); }
+
+function renderStats(){
+  document.getElementById('statToday').textContent = state.today;
+  document.getElementById('statMonth').textContent = state.month;
+}
+
+function renderQueue(){
+  const el = document.getElementById('queueList');
+  if(state.queue.length === 0){
+    el.innerHTML = `<div class="empty-hint">Nessun momento in attesa in questo momento.<br>Quando un cliente ne avrà uno da ritirare, apparirà qui.</div>`;
+    return;
+  }
+  el.innerHTML = state.queue.map((q,i) => `
+    <div class="queue-item">
+      <div class="emoji-wrap">${q.gift.emoji}</div>
+      <div class="info">
+        <strong>${q.for}</strong>
+        <span>${q.gift.name} · da ${q.from}</span>
+      </div>
+      <button class="verifybtn" onclick="verifyQueueItem(${i})">Verifica</button>
+    </div>
+  `).join('');
+}
+
+function renderFound(item){
+  const box = document.getElementById('foundContent');
+  box.innerHTML = `
+    <div class="found-hero">
+      <div class="found-emoji-wrap">${item.gift.emoji}</div>
+      <h2>${item.gift.name} · ${fmtPrice(item.gift.value)}</h2>
+    </div>
+    <div class="found-card">
+      <div class="found-row"><span class="l1">Per</span><span class="r1">${item.for}</span></div>
+      <div class="found-row"><span class="l1">Da</span><span class="r1">${item.from}</span></div>
+      <div class="found-row"><span class="l1">Codice</span><span class="r1">${item.code}</span></div>
+    </div>
+    ${item.quote ? `<div class="found-quote">"${item.quote}"</div>` : ''}
+  `;
+}
+
+function renderHistory(){
+  const el = document.getElementById('historyList');
+  if(state.history.length === 0){
+    el.innerHTML = `<div class="empty-hint">Nessun riscatto ancora registrato.</div>`;
+    return;
+  }
+  el.innerHTML = state.history.map(h => `
+    <div class="history-item">
+      <div class="emoji-wrap">${h.gift.emoji}</div>
+      <div class="info">
+        <strong>${h.gift.name} per ${h.for}</strong>
+        <span>da ${h.from}</span>
+      </div>
+      <div class="val">${fmtPrice(h.gift.value)}<span class="time">${h.time}</span></div>
+    </div>
+  `).join('');
+}
+
+function renderQR(){
+  const grid = document.getElementById('qrGrid');
+  let cells = '';
+  // deterministic pseudo-random pattern so it looks like a stable QR, not random each render
+  const seed = 'BAR-CENTRALE-12';
+  for(let i=0;i<64;i++){
+    const on = (seed.charCodeAt(i % seed.length) + i*7) % 5 < 2;
+    cells += `<span style="background:${on ? 'var(--white)' : 'transparent'}"></span>`;
+  }
+  grid.innerHTML = cells;
+}
+
+/* ============ NAVIGATION ============ */
+function showScreen(name){
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.querySelector(`.screen[data-view="${name}"]`);
+  el.classList.add('active');
+  el.scrollTop = 0;
+  const nav = document.getElementById('bottomnav');
+  const flowViews = ['codeentry','scan','found'];
+  nav.style.display = flowViews.includes(name) ? 'none' : 'flex';
+}
+function pushView(name){ history_stack.push(name); showScreen(name); }
+function goBack(){
+  if(history_stack.length > 1){ history_stack.pop(); showScreen(history_stack[history_stack.length-1]); }
+}
+function switchTab(tab){
+  history_stack = [tab]; showScreen(tab);
+  document.querySelectorAll('.navitem').forEach(n => n.classList.toggle('active', n.dataset.tab === tab));
+  if(tab==='storico') renderHistory();
+}
+
+/* ============ FLOW ACTIONS ============ */
+function openCodeEntry(){
+  document.getElementById('codeInput').value = '';
+  document.getElementById('codeError').textContent = '';
+  document.getElementById('codeSubmitBtn').classList.add('disabled');
+  pushView('codeentry');
+  setTimeout(()=> document.getElementById('codeInput').focus(), 320);
+}
+function onCodeInput(el){
+  el.value = el.value.replace(/[^0-9]/g,'');
+  document.getElementById('codeError').textContent = '';
+  document.getElementById('codeSubmitBtn').classList.toggle('disabled', el.value.length !== 6);
+}
+function submitCode(){
+  const code = document.getElementById('codeInput').value;
+  if(code.length !== 6) return;
+  const queued = state.queue.find(q => q.code === code);
+  const item = queued || generateDemoMoment(code);
+  state.pendingFound = item;
+  renderFound(item);
+  pushView('found');
+}
+
+function openScan(){ pushView('scan'); }
+function simulateScan(){
+  const item = state.queue[0] || generateDemoMoment(String(Math.floor(100000+Math.random()*900000)));
+  state.pendingFound = item;
+  renderFound(item);
+  pushView('found');
+}
+
+function verifyQueueItem(i){
+  state.pendingFound = state.queue[i];
+  renderFound(state.queue[i]);
+  pushView('found');
+}
+
+function generateDemoMoment(code){
+  const gift = GIFT_TYPES[Math.floor(Math.random()*GIFT_TYPES.length)];
+  const names = [...NAMES].sort(()=>Math.random()-.5);
+  return { code, for:names[0], from:names[1], gift, quote: QUOTES[Math.floor(Math.random()*QUOTES.length)] };
+}
+
+function confirmRedeem(){
+  const item = state.pendingFound;
+  if(!item) return;
+
+  // remove from queue if present
+  state.queue = state.queue.filter(q => q.code !== item.code);
+  // add to history
+  state.history.unshift({ code:item.code, for:item.for, from:item.from, gift:item.gift, time:'adesso' });
+  state.today += 1;
+  state.month += 1;
+
+  document.getElementById('successSub').textContent = `${item.gift.name} per ${item.for} · ${fmtPrice(item.gift.value)}`;
+  const overlay = document.getElementById('successOverlay');
+  overlay.classList.add('active');
+
+  setTimeout(()=>{
+    overlay.classList.remove('active');
+    renderStats();
+    renderQueue();
+    switchTab('home');
+  }, 1600);
+}
+
+function toggleActive(){
+  document.getElementById('activeToggle').classList.toggle('off');
+}
+
+/* ============ INIT ============ */
+renderStats();
+renderQueue();
+renderHistory();
+renderQR();
+switchTab('home');
+</script>
+</body>
+</html>
